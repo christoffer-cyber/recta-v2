@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
                         console.log(`  ✅ Matched Info: ${analysis.matchedInfo.length} items`);
                         
                         testResults.messages.push({
-                            message: message.substring(0, 100) + "...",
+                            message: (typeof message === 'string' ? message : (message as any)?.content || '').substring(0, 100) + "...",
                             confidence,
                             quality: analysis.quality,
                             matchedInfo: analysis.matchedInfo.length,
@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
                         console.log(`  ❌ Error: ${error.message}`);
                         testPassed = false;
                         testResults.messages.push({
-                            message: message.substring(0, 100) + "...",
+                            message: (typeof message === 'string' ? message : (message as any)?.content || '').substring(0, 100) + "...",
                             error: error.message
                         });
                     }
