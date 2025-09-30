@@ -55,3 +55,4 @@ export function Chat({ stepId, messages, onMessagesChange }: ChatProps) {
 		</div>
 	);
 }
+

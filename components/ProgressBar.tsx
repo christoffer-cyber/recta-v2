@@ -17,3 +17,4 @@ export function ProgressBar({ currentStep, totalSteps, percent }: ProgressBarPro
 		</div>
 	);
 }
+

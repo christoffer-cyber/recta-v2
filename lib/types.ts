@@ -43,3 +43,30 @@ export interface ChatResponse {
 		outputTokens: number;
 	};
 }
+
+// Extracted analysis structure for report generation
+export interface ExtractedAnalysis {
+	company: {
+		name?: string;
+		industry?: string;
+		size?: string;
+		growthStage?: string;
+	};
+	role: {
+		title?: string;
+		department?: string;
+		seniority?: string;
+		keyResponsibilities?: string[];
+	};
+	context: {
+		urgency?: string;
+		budget?: string;
+		timeline?: string;
+		teamSize?: string;
+	};
+	challenges: {
+		painPoints?: string[];
+		strategicGoals?: string[];
+		riskFactors?: string[];
+	};
+}

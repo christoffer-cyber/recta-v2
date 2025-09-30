@@ -15,3 +15,4 @@ export function StepCompletion({ onComplete, isFinal }: StepCompletionProps) {
 		</div>
 	);
 }
+

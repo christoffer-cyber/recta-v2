@@ -20,3 +20,4 @@ export function ReportPreview({ stepId, messages }: ReportPreviewProps) {
 		</div>
 	);
 }
+

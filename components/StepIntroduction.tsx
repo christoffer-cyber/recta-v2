@@ -16,3 +16,4 @@ export function StepIntroduction({ step, onBegin }: StepIntroductionProps) {
 		</div>
 	);
 }
+
