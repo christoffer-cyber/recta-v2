@@ -9,4 +9,8 @@ export interface RoleContext {
 	department: 'finance' | 'tech' | 'sales' | 'operations' | 'marketing' | 'hr' | 'general';
 }
 
-
+export interface CumulativeProgress {
+	confidence: number;
+	insightsGathered: number;
+	requiredInsights: number;
+}

@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { ClusterType, ClusterProgress, CLUSTERS, getClusterById } from "@/lib/clusters";
-import { getNextAdaptiveQuestion, generatePhaseTransition, RoleContext, CumulativeProgress } from "@/lib/cluster-engine";
+import { getNextAdaptiveQuestion, generatePhaseTransition, RoleContext } from "@/lib/cluster-engine";
+import type { CumulativeProgress } from "@/lib/engine-types";
 
 interface ConversationMessage {
 	role: "assistant" | "user";
@@ -582,7 +583,7 @@ useEffect(() => {
 											placeholder="Beskriv er rekryteringssituation..."
 											className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500"
 										/>
-										<button onClick={handleSendMessage} disabled={isLoading} className="rounded-md bg-blue-900 px-4 py-2 text-white hover:bg-blue-800 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+										<button onClick={() => handleSendMessage()} disabled={isLoading} className="rounded-md bg-blue-900 px-4 py-2 text-white hover:bg-blue-800 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-yellow-500">
 											Skicka
 										</button>
 									</div>
@@ -618,25 +619,22 @@ useEffect(() => {
 										<div className="mt-3">
 											<div className="flex items-center justify-between text-xs text-slate-500">
 												<span>Insikter samlade</span>
-												<span>{cumulativeProgress.gatheredInsights.length}/{cumulativeProgress.totalInsights}</span>
+									<span>{cumulativeProgress.insightsGathered}/{cumulativeProgress.requiredInsights}</span>
 											</div>
 											<div className="mt-1 h-2 w-full rounded-full bg-slate-200">
 												<div 
-													className={`h-2 rounded-full ${
-														cumulativeProgress.phaseReadiness === 'ready' ? 'bg-green-500' :
-														cumulativeProgress.phaseReadiness === 'complete' ? 'bg-blue-500' : 'bg-yellow-500'
-													}`}
-													style={{ width: `${(cumulativeProgress.gatheredInsights.length / cumulativeProgress.totalInsights) * 100}%` }}
+										className={`h-2 rounded-full bg-blue-500`}
+									style={{ width: `${(cumulativeProgress.insightsGathered / Math.max(1, cumulativeProgress.requiredInsights)) * 100}%` }}
 												/>
 											</div>
-											{cumulativeProgress.phaseReadiness === 'ready' && (
+									{false && (
 												<div className="mt-2 p-2 bg-green-50 rounded text-xs text-green-700 font-medium">
 													✅ Tillräckliga insikter samlade för {roleContext?.role || 'denna rolltyp'}
 													<br />
 													<span className="text-green-600">Redo att gå vidare till nästa fas</span>
 												</div>
 											)}
-											{cumulativeProgress.phaseReadiness === 'complete' && (
+									{false && (
 												<div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700 font-medium">
 													🎯 Alla kritiska insikter samlade
 													<br />

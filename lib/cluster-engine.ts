@@ -150,17 +150,7 @@ export { generateQuickResponseSuggestions } from './quick-responses';
  * Evaluates information depth across 6 universal categories
  */
 
-// moved to quality-analysis.ts
-interface UniversalQualityAnalysis {
-	categoriesCovered: number;
-	specificity: number;
-	quantification: number;
-	context: number;
-	causality: number;
-	businessImpact: boolean;
-	timingContext: boolean;
-	overallScore: number;
-}
+// moved to quality-analysis.ts (interface defined in quality-analysis)
 
 /**
  * Analyzes message quality using universal categories
@@ -178,7 +168,7 @@ export { calculateUniversalConfidence, ROLE_WEIGHTS, ROLE_COMPLETION_THRESHOLDS 
  */
 export const explainConfidence = (message: string | ConversationMessage) => {
     // Handle both string and ConversationMessage object inputs
-    const messageText = typeof message === 'string' ? message : message.content || message.text || '';
+    const messageText = typeof message === 'string' ? message : (message as ConversationMessage).content || '';
     const lower = messageText.toLowerCase();
     const qa = analyzeUniversalQuality(messageText, lower);
 
@@ -210,7 +200,7 @@ export const explainConfidence = (message: string | ConversationMessage) => {
     }
 
     return {
-        messagePreview: message.substring(0, 160),
+        messagePreview: messageText.substring(0, 160),
         categories: {
             situationDescription: qa.categoriesCovered >= 1,
             gapPainIdentification: undefined, // covered via categoriesCovered aggregate; see note below

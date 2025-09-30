@@ -59,9 +59,9 @@ IMPORTANT: Base only on actual conversation content. Be explicit about gaps. If 
 
   try {
     const result = await chatWithClaude(
-      [{ role: 'user', content: prompt }],
+      [{ role: 'user', content: prompt, timestamp: new Date().toISOString() } as any],
       'Generate a comprehensive recruitment analysis report based on the conversation provided.',
-      4000
+      { timeoutMs: 4000 }
     );
 
     return {

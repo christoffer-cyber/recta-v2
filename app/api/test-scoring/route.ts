@@ -127,10 +127,26 @@ export async function GET(request: NextRequest) {
             console.log(`\n📁 ${category.category}`);
             console.log("=".repeat(category.category.length + 3));
             
-            const categoryResults = {
-                category: category.category,
-                tests: []
-            };
+                const categoryResults: {
+                    category: string;
+                    tests: Array<{
+                        name: string;
+                        messages: Array<{
+                            message: string;
+                            confidence?: number;
+                            quality?: 'low' | 'medium' | 'high';
+                            matchedInfo?: number;
+                            missingInfo?: number;
+                            error?: string;
+                        }>;
+                        passed: boolean;
+                        actualProgression: number[];
+                        expectedProgression: number[];
+                    }>;
+                } = {
+                    category: category.category,
+                    tests: []
+                };
             
             for (const test of category.tests) {
                 console.log(`\n🔍 ${test.name}`);
@@ -139,12 +155,25 @@ export async function GET(request: NextRequest) {
                 totalTests++;
                 let testPassed = true;
                 const actualProgression: number[] = [];
-                const testResults = {
+                const testResults: {
+                    name: string;
+                    messages: Array<{
+                        message: string;
+                        confidence?: number;
+                        quality?: 'low' | 'medium' | 'high';
+                        matchedInfo?: number;
+                        missingInfo?: number;
+                        error?: string;
+                    }>;
+                    passed: boolean;
+                    actualProgression: number[];
+                    expectedProgression: number[];
+                } = {
                     name: test.name,
                     messages: [],
                     passed: false,
                     actualProgression: [],
-                    expectedProgression: test.expectedProgression
+                    expectedProgression: test.expectedProgression as number[]
                 };
                 
                 for (let i = 0; i < test.messages.length; i++) {
@@ -177,11 +206,12 @@ export async function GET(request: NextRequest) {
                         }
                         
                     } catch (error) {
-                        console.log(`  ❌ Error: ${error.message}`);
+                        const errMsg = error instanceof Error ? error.message : String(error);
+                        console.log(`  ❌ Error: ${errMsg}`);
                         testPassed = false;
                         testResults.messages.push({
                             message: (typeof message === 'string' ? message : (message as any)?.content || '').substring(0, 100) + "...",
-                            error: error.message
+                            error: errMsg
                         });
                     }
                 }
@@ -242,8 +272,9 @@ export async function GET(request: NextRequest) {
         
     } catch (error) {
         console.error("Test execution error:", error);
+        const details = error instanceof Error ? error.message : String(error);
         return NextResponse.json(
-            { error: "Test execution failed", details: error.message },
+            { error: "Test execution failed", details },
             { status: 500 }
         );
     }

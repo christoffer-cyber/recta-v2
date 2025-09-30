@@ -1,5 +1,6 @@
 import { CONVERSATION_SCENARIOS, TestResult, TestReport, TestScenario } from './conversation-scenarios.js';
 import { analyzeMessage, updateClusterProgress, canProgressToNext, detectRoleContext, calculateCumulativeProgress } from '../lib/cluster-engine.js';
+import type { ClusterProgress } from '../lib/clusters.js';
 
 export class ConversationTestRunner {
 	private results: TestResult[] = [];
@@ -34,11 +35,11 @@ export class ConversationTestRunner {
 	private async runScenario(scenario: TestScenario): Promise<TestResult> {
 		const actualProgression: number[] = [];
 		const errors: string[] = [];
-		let currentProgress = {
-			confidence: 0,
-			status: 'not-started' as const,
-			collectedInfo: [] as string[]
-		};
+        let currentProgress: ClusterProgress = {
+            confidence: 0,
+            status: 'not-started',
+            collectedInfo: []
+        };
 
 		// Detect role context from all messages
 		const roleContext = detectRoleContext(scenario.messages);
