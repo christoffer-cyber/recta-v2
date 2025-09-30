@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
                 
                 totalTests++;
                 let testPassed = true;
-                const actualProgression = [];
+                const actualProgression: number[] = [];
                 const testResults = {
                     name: test.name,
                     messages: [],
