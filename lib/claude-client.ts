@@ -13,8 +13,7 @@ console.log("🔍 Claude Client - API Key present:", !!API_KEY);
 console.log("🔍 Claude Client - API Key length:", API_KEY?.length || 0);
 
 const anthropic = new Anthropic({ 
-	apiKey: API_KEY,
-	dangerouslyAllowBrowser: true // Temporary fix for development
+    apiKey: API_KEY
 });
 
 export interface ClaudeChatResult {
