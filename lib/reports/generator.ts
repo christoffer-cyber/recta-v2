@@ -1,3 +1,4 @@
+// server-only
 import { chatWithClaude } from '@/lib/claude-client';
 import { RoleContext } from '@/lib/engine-types';
 

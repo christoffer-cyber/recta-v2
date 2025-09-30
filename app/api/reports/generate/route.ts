@@ -1,3 +1,4 @@
+// server-only
 import { NextRequest, NextResponse } from "next/server";
 import { generateRecruitmentReport, extractInformationGaps } from "@/lib/reports/generator";
 import { RoleContext } from "@/lib/engine-types";

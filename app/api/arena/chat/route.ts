@@ -1,3 +1,4 @@
+// server-only
 import { NextRequest, NextResponse } from "next/server";
 import { chatWithClaude } from "@/lib/claude-client";
 import { detectRoleContext, getRoleAwareQuestion, getPhaseProgressionSignal, getChallengerInsight, analyzeMessage, checkClusterCompletion } from "@/lib/cluster-engine";

@@ -1,4 +1,5 @@
 import { ClusterType } from './clusters';
+// server-only
 import { ConversationMessage, RoleContext } from './engine-types';
 import { chatWithClaude } from './claude-client';
 

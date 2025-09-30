@@ -1,3 +1,4 @@
+// server-only
 import { NextRequest, NextResponse } from "next/server";
 import { generateChatResponse } from "@/lib/claude-client";
 import { ChatRequest } from "@/lib/types";
