@@ -13,9 +13,10 @@ if (!API_KEY) {
 console.log("🔍 Claude Client - API Key present:", !!API_KEY);
 console.log("🔍 Claude Client - API Key length:", API_KEY?.length || 0);
 
-const anthropic = new Anthropic({ 
+// Only initialize Anthropic if API key is available
+const anthropic = API_KEY ? new Anthropic({ 
     apiKey: API_KEY
-});
+}) : null;
 
 export interface ClaudeChatResult {
 	text: string;
@@ -42,10 +43,14 @@ export const chatWithClaude = async (
     opts?: { model?: string; timeoutMs?: number }
 ): Promise<ClaudeChatResult> => {
 	try {
+		if (!anthropic) {
+			throw new Error("Anthropic client not initialized - ANTHROPIC_API_KEY is not set");
+		}
+
 		console.log("🔍 Claude Client - Starting chatWithClaude");
 		console.log("🔍 Claude Client - Messages count:", messages.length);
 		console.log("🔍 Claude Client - System prompt:", systemPrompt?.substring(0, 100) + "...");
-		const model = opts?.model || process.env.CLAUDE_MODEL || "claude-3-5-sonnet-20240620";
+		const model = opts?.model || process.env.CLAUDE_MODEL || "claude-3-5-sonnet-20241022";
 		const timeoutMs = opts?.timeoutMs ?? 35_000;
 		
 		const mapped = messages

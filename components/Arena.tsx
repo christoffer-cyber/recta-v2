@@ -128,6 +128,12 @@ export function Arena() {
 
 	const currentClusterData = useMemo(() => getClusterById(currentCluster), [currentCluster]);
 	const currentProgress = clusterProgress[currentCluster];
+	const currentIndex = useMemo(() => CLUSTERS.findIndex(c => c.id === currentCluster), [currentCluster]);
+	// Show progression CTA when server says it's possible AND confidence meets threshold (70%)
+	const canShowNext = useMemo(() => {
+		const conf = Math.round(serverAnalysis?.confidence || currentProgress.confidence);
+		return !!serverCanProgress && conf >= 70;
+	}, [serverCanProgress, serverAnalysis, currentProgress]);
 	const overallConfidence = useMemo(() => {
 		const total = Object.values(clusterProgress).reduce((sum, progress) => sum + progress.confidence, 0);
 		return Math.round(total / CLUSTERS.length);
@@ -332,8 +338,9 @@ useEffect(() => {
 
 	// Report generation function
 	async function handleGenerateReport() {
-		if (!roleContext || messages.length < 10) {
-			setError('Behöver minst 10 meddelanden och rollkontext för att generera rapport');
+		const readyForFinalReport = currentIndex === (CLUSTERS.length - 1) && (overallConfidence > 85) && !!roleContext;
+		if (!readyForFinalReport) {
+			setError('Rapport kan bara genereras när sista fasen är aktiv och total säkerhet > 85%.');
 			return;
 		}
 
@@ -341,7 +348,7 @@ useEffect(() => {
 		setError('');
 
 		try {
-			const currentPhase = CLUSTERS.findIndex(c => c.id === currentCluster) + 1;
+			const currentPhase = currentIndex + 1;
 			
 			const response = await fetch('/api/reports/generate', {
 				method: 'POST',
@@ -354,8 +361,12 @@ useEffect(() => {
 			});
 
 			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.error || 'Failed to generate report');
+				let message = 'Failed to generate report';
+				try {
+					const errorData = await response.json();
+					message = errorData.error || message;
+				} catch {}
+				throw new Error(message);
 			}
 
 			const data = await response.json();
@@ -511,7 +522,7 @@ useEffect(() => {
 								)}
 							</div>
 
-							{/* Phase Completion UI */}
+						{/* Phase Completion UI */}
 							{phaseCompleted && (
 								<div className="border-t border-slate-200 p-6">
 									<div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
@@ -684,6 +695,23 @@ useEffect(() => {
 								</div>
 							</div>
 						)}
+
+						{/* Progression signal (pre-completion) */}
+						{!phaseCompleted && canShowNext && (
+							<div className="border-t border-slate-200 p-4">
+								<div className="rounded-md border border-green-200 bg-green-50 p-4 flex items-center justify-between">
+									<div className="text-sm text-green-800">
+										✅ Tillräcklig framsteg för att gå vidare till nästa fas
+									</div>
+									<button
+										onClick={handleNextPhase}
+										className="rounded-md bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+									>
+										Gå vidare →
+									</button>
+								</div>
+							</div>
+						)}
 						<div className="pt-2 border-t border-blue-200">
 							<div className="flex items-center justify-between">
 								<span className="text-slate-600">Aktuell poäng:</span>
@@ -707,11 +735,10 @@ useEffect(() => {
 						)}
 
 						{/* Phase Completion */}
-			{(() => {
-				console.log('🔍 ARENA - Right sidebar completion check (serverCanProgress):', serverCanProgress);
-				console.log('🔍 ARENA - currentProgress.confidence:', currentProgress.confidence);
-				return serverCanProgress;
-			})() && (
+					{(() => {
+						console.log('🔍 ARENA - Right sidebar completion check (serverCanProgress/conf>=70):', canShowNext);
+						return canShowNext;
+					})() && (
 							<div className="rounded-lg border border-green-200 bg-green-50 p-5 shadow-sm">
 								<h2 className="text-base font-semibold text-green-900">Fas slutförd!</h2>
 								<p className="mt-2 text-sm text-green-700">Denna fas är tillräckligt utforskad för att gå vidare.</p>
@@ -752,7 +779,7 @@ useEffect(() => {
 										>
 											<div className="flex items-center gap-2">
 												<span>{cluster.icon}</span>
-												<span>Fas {CLUSTERS.indexOf(cluster) + 1}</span>
+										<span>{cluster.title}</span>
 											</div>
 											<span className={progress.status === 'completed' ? 'text-green-600' : progress.status === 'in-progress' ? 'text-blue-600' : 'text-slate-400'}>
 												{progress.status === 'completed' ? '✓' : progress.status === 'in-progress' ? '●' : '○'}
@@ -763,26 +790,19 @@ useEffect(() => {
 							</div>
 						</div>
 
-						{/* Generate Report Button */}
-						{messages.length >= 10 && roleContext && (
+					{/* Generate Report Button */}
+					{currentIndex === (CLUSTERS.length - 1) && overallConfidence > 85 && roleContext && (
 							<div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
 								<h2 className="text-base font-semibold text-blue-900">Rapport</h2>
 								<p className="mt-2 text-sm text-slate-600">
-									{CLUSTERS.findIndex(c => c.id === currentCluster) + 1 < 6 
-										? 'Generera utkast baserat på nuvarande konversation'
-										: 'Generera slutrapport baserat på fullständig analys'
-									}
+								Generera slutrapport baserat på fullständig analys
 								</p>
 								<button
 									onClick={handleGenerateReport}
 									disabled={isGeneratingReport}
 									className="mt-3 rounded-md bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
 								>
-									{isGeneratingReport ? 'Genererar...' : 
-									 CLUSTERS.findIndex(c => c.id === currentCluster) + 1 < 6 
-										? 'Generera utkast' 
-										: 'Generera slutrapport'
-									}
+								{isGeneratingReport ? 'Genererar...' : 'Generera slutrapport'}
 								</button>
 								{report && (
 									<div className="mt-3 text-xs text-slate-500">
