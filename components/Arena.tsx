@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { ClusterType, ClusterProgress, CLUSTERS, getClusterById } from "@/lib/clusters";
 import { getNextAdaptiveQuestion, generatePhaseTransition, RoleContext } from "@/lib/cluster-engine";
 import type { CumulativeProgress } from "@/lib/engine-types";
@@ -126,6 +126,9 @@ export function Arena() {
 	const [isGeneratingReport, setIsGeneratingReport] = useState<boolean>(false);
 	const [showReportModal, setShowReportModal] = useState<boolean>(false);
 
+	// Auto-scroll ref for messages container
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+
 	const currentClusterData = useMemo(() => getClusterById(currentCluster), [currentCluster]);
 	const currentProgress = clusterProgress[currentCluster];
 	const currentIndex = useMemo(() => CLUSTERS.findIndex(c => c.id === currentCluster), [currentCluster]);
@@ -178,6 +181,13 @@ useEffect(() => {
 			clearSessionState();
 		}
 	}, [phaseCompleted]);
+
+	// Auto-scroll to bottom when new messages arrive
+	useEffect(() => {
+		if (messagesEndRef.current) {
+			messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [messages]);
 
 	// Handle starting fresh
 	const handleStartFresh = () => {
@@ -520,6 +530,8 @@ useEffect(() => {
 										<div className="inline-block rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500">Tänker…</div>
 									</div>
 								)}
+								{/* Auto-scroll target */}
+								<div ref={messagesEndRef} />
 							</div>
 
 						{/* Phase Completion UI */}
